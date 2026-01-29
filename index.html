@@ -1788,37 +1788,60 @@ function updateBookingTotal() {
     document.getElementById('booking-total-display').innerText = `R$ ${price},00`;
 }
 
-// ATUALIZAR FUNÇÃO confirmBooking
 async function confirmBooking(e) {
     e.preventDefault();
     
     // Pegar dados do formulário
-    const name = document.getElementById('book-name').value.trim();
-    let phone = document.getElementById('book-phone').value.trim();
+    const nameInput = document.getElementById('book-name');
+    const phoneInput = document.getElementById('book-phone');
+    
+    if (!nameInput || !phoneInput) {
+        showToast("Erro no formulário. Recarregue a página.", "error");
+        return;
+    }
+
+    const name = nameInput.value.trim();
+    let phone = phoneInput.value.trim();
     
     // PEGAR SERVIÇO SELECIONADO
     const select = document.getElementById('book-service');
-    const serviceName = select.value;
-    const serviceValue = parseFloat(select.options[select.selectedIndex].dataset.price);
+    // Se não tiver select (erro de carregamento), usa padrão
+    const serviceName = select ? select.value : 'Corte Padrão';
+    const serviceValue = select ? parseFloat(select.options[select.selectedIndex].dataset.price) : 0;
 
-    // ... (Validações de telefone igual antes) ...
+    // Validação simples
+    if (!name || !phone) {
+        showToast("Preencha todos os campos.", "error");
+        return;
+    }
 
     showLoader(true);
 
     try {
-        const formattedPhone = formatPhone(phone);
+        // Formatar telefone (função auxiliar existente no seu código)
+        const formattedPhone = typeof formatPhone === 'function' ? formatPhone(phone) : phone;
         
-        // ... (Lógica de criar/atualizar cliente igual antes) ...
+        // Verifica se state.selectedDate existe, senão usa hoje
+        const dateToBook = state.selectedDate || new Date().toISOString().split('T')[0];
+        const slotToBook = state.selectedSlot || '00:00';
 
-        // Criar agendamento com os NOVOS DADOS
+        // Lógica de criar/atualizar cliente (Simplificada para foco no agendamento)
+        const clientRef = db.collection('clients').doc(formattedPhone);
+        await clientRef.set({
+            name: name,
+            phone: formattedPhone,
+            lastSession: dateToBook,
+            updatedAt: new Date()
+        }, { merge: true });
+
+        // Criar agendamento
         const bookingId = db.collection('bookings').doc().id;
         const bookingData = {
             id: bookingId,
-            date: state.selectedDate,
-            time: state.selectedSlot,
+            date: dateToBook,
+            time: slotToBook,
             clientName: name,
             clientPhone: formattedPhone,
-            // AQUI SALVAMOS O SERVIÇO ESPECÍFICO
             serviceName: serviceName, 
             value: serviceValue,
             status: 'confirmed',
@@ -1829,20 +1852,19 @@ async function confirmBooking(e) {
 
         await db.collection('bookings').doc(bookingId).set(bookingData);
         
-        // ... (Resto do código: cache, fechar modal, toast) ...
+        // Fechar modal
+        if(typeof closeModal === 'function') closeModal('modal-booking');
         
-        // REDIRECIONAR PRO WHATSAPP (MENSAGEM ATUALIZADA)
+        // REDIRECIONAR PRO WHATSAPP
         setTimeout(() => {
-            const formattedDate = state.selectedDate.split('-').reverse().join('/');
-            
-            // Mensagem personalizada com o serviço
-            const message = `Fala mestre! Aqui é o ${name}. Agendei um *${serviceName}* para dia ${formattedDate} às ${state.selectedSlot}. Tudo certo?`;
-            
+            const dateFmt = dateToBook.split('-').reverse().join('/');
+            const message = `Fala mestre! Aqui é o ${name}. Agendei um *${serviceName}* para dia ${dateFmt} às ${slotToBook}. Tudo certo?`;
             const encodedMessage = encodeURIComponent(message);
-            window.location.href = `https://wa.me/55SEUNUMERO?text=${encodedMessage}`;
-            
-            // ...
-        }, 500);
+            // Substitua SEUNUMERO pelo número real do barbeiro nas configurações ou fixo
+            window.location.href = `https://wa.me/5516999999999?text=${encodedMessage}`;
+        }, 1000);
+
+        showToast("Agendamento realizado!");
 
     } catch (error) {
         console.error(error);
@@ -1851,130 +1873,6 @@ async function confirmBooking(e) {
         showLoader(false);
     }
 }
-        
-        async function confirmBooking(e) {
-            e.preventDefault();
-            
-            const name = document.getElementById('book-name').value.trim();
-            let phone = document.getElementById('book-phone').value.trim();
-            const email = document.getElementById('book-email').value.trim();
-            const source = document.getElementById('book-source').value;
-            
-            // Formatar o telefone para o padrão brasileiro
-            phone = phone.replace(/\D/g, '');
-            if (phone.length === 10) {
-                phone = phone.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3');
-            } else if (phone.length === 11) {
-                phone = phone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3');
-            }
-            
-            if (!name || !phone) {
-                showToast("Por favor, preencha todos os campos obrigatórios.", "error");
-                return;
-            }
-            
-            if (!validatePhone(phone)) {
-                showToast("Número de WhatsApp inválido. Use o formato (11) 99999-9999", "error");
-                return;
-            }
-            
-            showLoader(true);
-            
-            try {
-                const formattedPhone = formatPhone(phone);
-                const value = state.settings?.sessionValue || 150;
-                
-                // Verificar se cliente já existe
-                let clientData = cache.clients[formattedPhone];
-                
-                if (!clientData) {
-                    // Criar novo cliente
-                    clientData = {
-                        name: name,
-                        phone: formattedPhone,
-                        email: email || null,
-                        source: source,
-                        createdAt: new Date(),
-                        updatedAt: new Date(),
-                        lastSession: state.selectedDate,
-                        totalSessions: 1
-                    };
-                    
-                    // Salvar no Firebase
-                    const clientRef = db.collection('clients').doc(formattedPhone);
-                    await clientRef.set(clientData);
-                    
-                    // Adicionar ao cache
-                    cache.clients[formattedPhone] = clientData;
-                } else {
-                    // Atualizar último agendamento e contador de sessões
-                    clientData.lastSession = state.selectedDate;
-                    clientData.totalSessions = (clientData.totalSessions || 0) + 1;
-                    clientData.updatedAt = new Date();
-                    
-                    await db.collection('clients').doc(formattedPhone).update({
-                        lastSession: state.selectedDate,
-                        totalSessions: firebase.firestore.FieldValue.increment(1),
-                        updatedAt: new Date()
-                    });
-                }
-                
-                // Criar novo agendamento
-                const bookingId = db.collection('bookings').doc().id;
-                const bookingData = {
-                    id: bookingId,
-                    date: state.selectedDate,
-                    time: state.selectedSlot,
-                    clientName: name,
-                    clientPhone: formattedPhone,
-                    clientEmail: email || null,
-                    clientSource: source,
-                    value: value,
-                    status: 'confirmed',
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                    reminderSent: false
-                };
-                
-                // Salvar no Firebase
-                await db.collection('bookings').doc(bookingId).set(bookingData);
-                
-                // Adicionar ao cache
-                cache.bookings.unshift(bookingData);
-                if (cache.bookings.length > 100) cache.bookings.pop();
-                
-                // Fechar modal
-closeModal('modal-booking');
-
-// Redirecionar para WhatsApp com mensagem formatada após salvar o agendamento
-setTimeout(() => {
-    // Formatar data para exibição
-    const formattedDate = state.selectedDate.split('-').reverse().join('/');
-    
-    // Montar mensagem para o psicólogo
-    const message = `Olá, me chamo ${name}, gostaria de agendar uma sessão para o dia ${formattedDate} às ${state.selectedSlot}.`;
-    
-    // Codificar a mensagem para URL e redirecionar para WhatsApp
-    const encodedMessage = encodeURIComponent(message);
-    window.location.href = `https://wa.me/5516991421704?text=${encodedMessage}`;
-    
-    // Mensagem de sucesso
-    showToast("Solicitação enviada com sucesso! Você será redirecionado para o WhatsApp.");
-    
-    // Atualizar interface depois de um breve delay
-    setTimeout(() => {
-        renderClientSlots();
-        renderClientDates();
-        navigateTo('view-profile');
-    }, 3000);
-}, 500);
-            } catch (error) {
-                console.error("Error confirming booking:", error);
-                showToast("Erro ao solicitar agendamento. Tente novamente.", "error");
-            } finally {
-                showLoader(false);
-            }
-        }
         
         function validatePhone(phone) {
             // Remover caracteres não numéricos
@@ -4027,88 +3925,48 @@ async function generateSlotsForSingleDay(period, date) {
         }
         
         async function saveSettings() {
-            showLoader(true);
-            const saveButton = document.querySelector('#tab-settings button');
-            const originalText = saveButton.innerHTML;
-            saveButton.innerHTML = '<i class="fa-solid fa-spinner animate-spin mr-1"></i> Salvando...';
-            
-            try {
-                // Obter valores dos campos
-                const professionalName = document.getElementById('setting-professional-name').value.trim();
-                const crp = document.getElementById('setting-crp').value.trim();
-                const specialties = document.getElementById('setting-specialties').value.trim();
-                const sessionValue = parseFloat(document.getElementById('setting-session-value').value) || 150;
-                const sessionDuration = parseInt(document.getElementById('setting-session-duration').value) || 50;
-                const confirmMsg = document.getElementById('setting-msg-confirm').value.trim();
-                const reminderMsg = document.getElementById('setting-msg-reminder').value.trim();
-                const videoLink = document.getElementById('setting-video-link').value.trim();
-                
-                // Obter dias úteis selecionados
-                const workingDays = [];
-                document.querySelectorAll('#tab-settings input[type="checkbox"]').forEach(checkbox => {
-                    if (checkbox.checked) {
-                        workingDays.push(checkbox.id.replace('day-', ''));
-                    }
-                });
-                
-                // Validar dados obrigatórios
-                if (!professionalName || !crp) {
-                    showToast("Nome do profissional e registro (CRP) são obrigatórios.", "error");
-                    return;
-                }
-                
-                // Atualizar state.settings
-                state.settings = {
-                    ...state.settings,
-                    professionalName,
-                    crp,
-                    specialties,
-                    sessionValue,
-                    sessionDuration,
-                    confirmMsg,
-                    reminderMsg,
-                    videoLink,
-                    workingDays,
-                    updatedAt: new Date()
-                };
-                
-                // Salvar no Firebase
-                await db.collection('settings').doc('main').set(state.settings, { merge: true });
-                
-                // Atualizar informações do profissional na view do cliente SOMENTE se os elementos existirem
-const profileTitle = document.querySelector('#view-profile h1');
-const profileSubtitle = document.querySelector('#view-profile .text-sky-400');
-const sessionValueElement = document.querySelector('#view-profile .text-lg.font-bold.text-blue-700');
-const confirmBarValue = document.querySelector('#client-confirm-bar .text-sm.font-bold.text-sky-400');
-
-if (profileTitle) profileTitle.innerText = professionalName;
-if (profileSubtitle) profileSubtitle.innerHTML = `${professionalName.split(' ')[0]} &bull; ${crp}`;
-if (sessionValueElement) sessionValueElement.innerText = `R$ ${sessionValue}`;
-if (confirmBarValue) confirmBarValue.innerText = `R$ ${sessionValue},00`;
-
-// Atualizar especialidades SOMENTE se o container existir
-const specialtiesContainer = document.querySelector('#view-profile .flex.flex-wrap.gap-2');
-if (specialtiesContainer) {
-specialtiesContainer.innerHTML = '';
-specialties.split(',').map(s => s.trim()).forEach(specialty => {
-if (specialty) {
-specialtiesContainer.innerHTML += `
-<span class="px-3 py-1 bg-gray-100 text-slate-400 text-xs font-semibold rounded-full">${specialty}</span>
-`;
-}
-});
-}
-                
-                showToast("Configurações salvas com sucesso!");
-            } catch (error) {
-                console.error("Error saving settings:", error);
-                showToast("Erro ao salvar configurações. Tente novamente.", "error");
-            } finally {
-                showLoader(false);
-                saveButton.innerHTML = originalText;
-            }
-        }
+    showLoader(true);
+    // Tenta encontrar o botão de salvar, se não achar, continua sem ele
+    const saveButton = document.querySelector('#tab-settings button') || { innerHTML: '' };
+    const originalText = saveButton.innerHTML;
+    saveButton.innerHTML = '<i class="fa-solid fa-spinner animate-spin mr-1"></i> Salvando...';
+    
+    try {
+        const professionalName = document.getElementById('setting-professional-name').value.trim();
+        const sessionDuration = parseInt(document.getElementById('setting-session-duration').value) || 40;
         
+        // Pega os dias de trabalho marcados
+        const workingDays = [];
+        document.querySelectorAll('#tab-settings input[type="checkbox"]').forEach(checkbox => {
+            if (checkbox.checked) workingDays.push(checkbox.id.replace('day-', ''));
+        });
+
+        // Atualiza o objeto de configurações
+        // NOTA: Mantemos os 'services' que já estão na memória (state.settings.services)
+        state.settings = {
+            ...state.settings,
+            professionalName,
+            sessionDuration,
+            workingDays,
+            updatedAt: new Date()
+        };
+
+        // Salva no Firebase
+        await db.collection('settings').doc('main').set(state.settings, { merge: true });
+        
+        // Atualiza visual da Home Page (View Profile) se os elementos existirem
+        const profileTitle = document.querySelector('#view-profile h1');
+        if (profileTitle) profileTitle.innerText = professionalName;
+
+        showToast("Configurações salvas com sucesso!");
+    } catch (error) {
+        console.error("Erro ao salvar:", error);
+        showToast("Erro ao salvar configurações.", "error");
+    } finally {
+        showLoader(false);
+        saveButton.innerHTML = originalText;
+    }
+}       
         async function exportAllData() {
             if (!confirm("Você está prestes a exportar TODOS os dados do sistema. Deseja continuar?")) {
                 return;
