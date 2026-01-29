@@ -589,7 +589,7 @@
                             <div class="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center mb-3">
                                 <i class="fa-solid fa-calendar-check text-xl"></i>
                             </div>
-                            <div class="text-slate-400 text-[10px] font-bold uppercase">Sessões (Mês)</div>
+                            <div class="text-slate-400 text-[10px] font-bold uppercase">Cortes-Serviços (Mês)</div>
                             <div class="stats-number text-slate-100" id="dash-month-count">0</div>
                         </div>
                         <div class="bg-slate-800 p-5 rounded-xl shadow-sm border border-slate-700 dashboard-card">
@@ -643,7 +643,7 @@
                     
                     <div class="bg-slate-800 rounded-2xl shadow-sm border border-slate-700 overflow-hidden">
                         <div class="p-5 border-b border-slate-700">
-                            <h3 class="font-bold text-slate-100">Sessões por Dia da Semana</h3>
+                            <h3 class="font-bold text-slate-100">Cortes por Dia da Semana</h3>
                         </div>
                         <div class="p-6">
                             <div id="chart-weekday" class="h-60 flex items-end justify-around">
@@ -785,7 +785,7 @@ Se estiver acessando pelo computador, após baixar o arquivo .ics, abra o Google
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div class="bg-slate-800 p-4 rounded-xl shadow-sm border border-slate-700">
-                        <p class="text-xs text-slate-400 font-bold uppercase mb-1">Sessões Realizadas</p>
+                        <p class="text-xs text-slate-400 font-bold uppercase mb-1">Serviços Realizadas</p>
                         <p class="text-2xl font-bold text-slate-100" id="fin-sessions-done">0</p>
                         <p class="text-xs text-slate-500 mt-1">Este mês</p>
                     </div>
@@ -2399,7 +2399,7 @@ async function generateSlotsForSingleDay(period, date) {
                 // Remover do cache
                 cache.bookings = cache.bookings.filter(b => b.id !== bookingId);
                 
-                // Atualizar contagem de sessões do cliente
+                // Atualizar contagem de cortes do cliente
                 const booking = cache.bookings.find(b => b.id === bookingId);
                 if (booking) {
                     const clientPhone = booking.clientPhone;
@@ -2736,7 +2736,7 @@ async function generateSlotsForSingleDay(period, date) {
                                 <i class="fa-solid fa-calendar-day mr-1 text-slate-400"></i> Última: ${formattedDate}
                             </span>
                             <span class="text-[11px] text-slate-500 flex items-center">
-                                <i class="fa-solid fa-stethoscope mr-1 text-slate-400"></i> ${totalSessions} ${totalSessions !== 1 ? 'sessões' : 'sessão'}
+                                <i class="fa-solid fa-stethoscope mr-1 text-slate-400"></i> ${totalSessions} ${totalSessions !== 1 ? 'Cortes' : 'Corte'}
                             </span>
                         </div>
                     </div>
@@ -2912,7 +2912,7 @@ async function generateSlotsForSingleDay(period, date) {
                                     <i class="fa-solid fa-calendar-day mr-1 text-slate-400"></i> Última sessão: ${formattedDate}
                                 </span>
                                 <span class="text-slate-500 flex items-center">
-                                    <i class="fa-solid fa-user-injured mr-1 text-slate-400"></i> ${totalSessions} ${totalSessions !== 1 ? 'sessões' : 'sessão'}
+                                    <i class="fa-solid fa-user-injured mr-1 text-slate-400"></i> ${totalSessions} ${totalSessions !== 1 ? 'cortes' : 'corte'}
                                 </span>
                                 ${source ? `
                                 <span class="text-slate-500 flex items-center">
@@ -3009,7 +3009,7 @@ async function generateSlotsForSingleDay(period, date) {
                                 <i class="fa-solid fa-calendar-day mr-1 text-slate-400"></i> Última sessão: ${formattedDate}
                             </span>
                             <span class="text-slate-500 flex items-center">
-                                <i class="fa-solid fa-user-injured mr-1 text-slate-400"></i> ${totalSessions} ${totalSessions !== 1 ? 'sessões' : 'sessão'}
+                                <i class="fa-solid fa-user-injured mr-1 text-slate-400"></i> ${totalSessions} ${totalSessions !== 1 ? 'cortes' : 'corte'}
                             </span>
                             ${source ? `
                             <span class="text-slate-500 flex items-center">
@@ -3306,7 +3306,7 @@ async function generateSlotsForSingleDay(period, date) {
                     'Origem',
                     'Data de Registro',
                     'Última Sessão',
-                    'Total de Sessões'
+                    'Total de Cortes'
                 ];
                 
                 // Dados
@@ -3432,11 +3432,11 @@ async function generateSlotsForSingleDay(period, date) {
             return `
                 <div class="p-5">
                     <h3 class="font-bold text-lg text-slate-100 mb-4">Relatório de Atendimentos</h3>
-                    <p class="text-sm text-slate-500 mb-6">Período: ${periodText} | Total de Sessões: ${periodBookings.length}</p>
+                    <p class="text-sm text-slate-500 mb-6">Período: ${periodText} | Total de Cortes: ${periodBookings.length}</p>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div class="bg-slate-900 rounded-xl p-4">
-                            <h4 class="font-bold text-slate-100 mb-3">Sessões por Dia da Semana</h4>
+                            <h4 class="font-bold text-slate-100 mb-3">Cortes por Dia da Semana</h4>
                             <div class="space-y-3">
                                 ${weekdays.map((day, i) => `
                                     <div class="flex justify-between items-center">
@@ -3453,7 +3453,7 @@ async function generateSlotsForSingleDay(period, date) {
                         </div>
                         
                         <div class="bg-slate-900 rounded-xl p-4">
-                            <h4 class="font-bold text-slate-100 mb-3">Sessões por Horário</h4>
+                            <h4 class="font-bold text-slate-100 mb-3">Cortes por Horário</h4>
                             <div class="space-y-2 max-h-48 overflow-y-auto pr-2">
                                 ${Object.entries(hourlyCounts).sort().map(([hour, count]) => `
                                     <div class="flex justify-between items-center">
@@ -3542,7 +3542,7 @@ async function generateSlotsForSingleDay(period, date) {
                             <p class="text-2xl font-bold mt-1">${totalRevenue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
                         </div>
                         <div class="bg-gradient-to-br from-blue-500 to-blue-600 text-white rounded-xl p-4">
-                            <p class="text-xs font-bold uppercase tracking-wider opacity-90">Número de Sessões</p>
+                            <p class="text-xs font-bold uppercase tracking-wider opacity-90">Número de Cortes/Serviços</p>
                             <p class="text-2xl font-bold mt-1">${periodBookings.length}</p>
                         </div>
                         <div class="bg-gradient-to-br from-amber-500 to-amber-600 text-white rounded-xl p-4">
@@ -3652,7 +3652,7 @@ async function generateSlotsForSingleDay(period, date) {
                 clientsMap[clientPhone].totalValue += booking.value || 150;
             });
             
-            // Converter para array e ordenar por quantidade de sessões
+            // Converter para array e ordenar por quantidade de Horários
             const clientsArray = Object.values(clientsMap)
                 .map((data, index) => ({
                     phone: Object.keys(clientsMap)[index],
@@ -3673,7 +3673,7 @@ async function generateSlotsForSingleDay(period, date) {
                                     <div class="flex justify-between items-center">
                                         <span class="text-sm font-medium text-slate-100">${i+1}. ${clientData.client.name}</span>
                                         <div class="flex items-center">
-                                            <span class="text-sm font-bold text-slate-100 mr-3">${clientData.sessions.length} sessões</span>
+                                            <span class="text-sm font-bold text-slate-100 mr-3">${clientData.sessions.length} Cortes</span>
                                             <div class="w-16 bg-slate-200 rounded-full h-2 overflow-hidden">
                                                 <div class="h-full bg-blue-500 rounded-full" style="width: ${Math.min(100, clientData.sessions.length / Math.max(...clientsArray.map(c => c.sessions.length)) * 100)}%"></div>
                                             </div>
@@ -3706,7 +3706,7 @@ async function generateSlotsForSingleDay(period, date) {
                             <thead class="bg-slate-900">
                                 <tr>
                                     <th class="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Clientes</th>
-                                    <th class="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Sessões</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Cortes</th>
                                     <th class="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Valor Total</th>
                                     <th class="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Média por Sessão</th>
                                     <th class="px-4 py-2 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Primeira Sessão</th>
