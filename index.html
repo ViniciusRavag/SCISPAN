@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, generateSmartSummary()user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Psi. Vinicius Ravagnani</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -1404,36 +1404,6 @@ function updateSettingsUI() {
         if (checkbox) checkbox.checked = true;
     });
 }
-                
-                // Atualizar informações do profissional SOMENTE se os elementos existirem
-if (state.settings.professionalName) {
-const profileTitle = document.querySelector('#view-profile h1');
-const profileSubtitle = document.querySelector('#view-profile .text-sky-400');
-if (profileTitle) profileTitle.innerText = state.settings.professionalName;
-if (profileSubtitle) profileSubtitle.innerHTML = `${state.settings.professionalName.split(' ')[0]} &bull; ${state.settings.crp}`;
-}
-if (state.settings.sessionValue) {
-const sessionValueElement = document.querySelector('#view-profile .text-lg.font-bold.text-blue-700');
-const confirmBarValue = document.querySelector('#client-confirm-bar .text-sm.font-bold.text-sky-400');
-if (sessionValueElement) sessionValueElement.innerText = `R$ ${state.settings.sessionValue}`;
-if (confirmBarValue) confirmBarValue.innerText = `R$ ${state.settings.sessionValue},00`;
-}
-if (state.settings.specialties) {
-const specialtiesContainer = document.querySelector('#view-profile .flex.flex-wrap.gap-2');
-if (specialtiesContainer) {
-specialtiesContainer.innerHTML = '';
-state.settings.specialties.split(',').map(s => s.trim()).forEach(specialty => {
-specialtiesContainer.innerHTML += `
-<span class="px-3 py-1 bg-gray-100 text-slate-400 text-xs font-semibold rounded-full">${specialty}</span>
-`;
-});
-}
-}
-            } catch (error) {
-                console.error("Error loading settings:", error);
-                showToast("Erro ao carregar configurações do sistema.", "error");
-            }
-        }
         
         async function loadSlotsCache() {
             try {
@@ -2279,78 +2249,6 @@ async function confirmBooking(e) {
             }
         }
         
-        async function bulkGenerate(period) {
-            if (!confirm(`Isso adicionará vários horários para ${period === 'morning' ? 'manhã' : period === 'afternoon' ? 'tarde' : period === 'evening' ? 'noite' : 'o dia todo'}. Deseja continuar?`)) {
-                return;
-            }
-            
-            try {
-                showLoader(true);
-                
-                let newSlots = [];
-                let daySlots = cache.slots[currentModalDate] || [];
-                
-                if (period === 'morning' || period === 'all') {
-                    // Manhã: 8h às 12h, a cada 50 minutos
-                    for (let h = 8; h <= 12; h++) {
-                        const timeStr = `${String(h).padStart(2, '0')}:00`;
-                        if (!daySlots.includes(timeStr) && !newSlots.includes(timeStr)) {
-                            newSlots.push(timeStr);
-                        }
-                    }
-                }
-                
-                if (period === 'afternoon' || period === 'all') {
-                    // Tarde: 13h às 18h, a cada 50 minutos
-                    for (let h = 13; h <= 18; h++) {
-                        const timeStr = `${String(h).padStart(2, '0')}:00`;
-                        if (!daySlots.includes(timeStr) && !newSlots.includes(timeStr)) {
-                            newSlots.push(timeStr);
-                        }
-                    }
-                }
-                
-                if (period === 'evening' || period === 'all') {
-                    // Noite: 19h às 21h, a cada 50 minutos
-                    for (let h = 19; h <= 21; h++) {
-                        const timeStr = `${String(h).padStart(2, '0')}:00`;
-                        if (!daySlots.includes(timeStr) && !newSlots.includes(timeStr)) {
-                            newSlots.push(timeStr);
-                        }
-                    }
-                }
-                
-                if (newSlots.length === 0) {
-                    showToast("Todos os horários deste período já estão cadastrados.", "error");
-                    return;
-                }
-                
-                // Combinar slots existentes com novos slots
-                daySlots = [...daySlots, ...newSlots];
-                daySlots.sort();
-                
-                // Atualizar no Firebase
-                await db.collection('slots').doc(currentModalDate).set({
-                    times: daySlots,
-                    date: currentModalDate,
-                    updatedAt: new Date()
-                });
-                
-                // Atualizar cache
-                cache.slots[currentModalDate] = daySlots;
-                
-                // Renderizar novamente
-                renderAdminDaySlots();
-                renderAdminCalendar();
-                
-                showToast(`${newSlots.length} novos horários adicionados com sucesso!`);
-            } catch (error) {
-                console.error("Error generating slots:", error);
-                showToast("Erro ao gerar horários. Tente novamente.", "error");
-            } finally {
-                showLoader(false);
-            }
-        }
         function bulkGenerate(period) {
   const periodText = period === 'morning' ? 'manhã (08-12h)' : 
                      period === 'afternoon' ? 'tarde (13-18h)' : 
@@ -3924,49 +3822,6 @@ async function generateSlotsForSingleDay(period, date) {
             return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
         }
         
-        async function saveSettings() {
-    showLoader(true);
-    // Tenta encontrar o botão de salvar, se não achar, continua sem ele
-    const saveButton = document.querySelector('#tab-settings button') || { innerHTML: '' };
-    const originalText = saveButton.innerHTML;
-    saveButton.innerHTML = '<i class="fa-solid fa-spinner animate-spin mr-1"></i> Salvando...';
-    
-    try {
-        const professionalName = document.getElementById('setting-professional-name').value.trim();
-        const sessionDuration = parseInt(document.getElementById('setting-session-duration').value) || 40;
-        
-        // Pega os dias de trabalho marcados
-        const workingDays = [];
-        document.querySelectorAll('#tab-settings input[type="checkbox"]').forEach(checkbox => {
-            if (checkbox.checked) workingDays.push(checkbox.id.replace('day-', ''));
-        });
-
-        // Atualiza o objeto de configurações
-        // NOTA: Mantemos os 'services' que já estão na memória (state.settings.services)
-        state.settings = {
-            ...state.settings,
-            professionalName,
-            sessionDuration,
-            workingDays,
-            updatedAt: new Date()
-        };
-
-        // Salva no Firebase
-        await db.collection('settings').doc('main').set(state.settings, { merge: true });
-        
-        // Atualiza visual da Home Page (View Profile) se os elementos existirem
-        const profileTitle = document.querySelector('#view-profile h1');
-        if (profileTitle) profileTitle.innerText = professionalName;
-
-        showToast("Configurações salvas com sucesso!");
-    } catch (error) {
-        console.error("Erro ao salvar:", error);
-        showToast("Erro ao salvar configurações.", "error");
-    } finally {
-        showLoader(false);
-        saveButton.innerHTML = originalText;
-    }
-}       
         async function exportAllData() {
             if (!confirm("Você está prestes a exportar TODOS os dados do sistema. Deseja continuar?")) {
                 return;
