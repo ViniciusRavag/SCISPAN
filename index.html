@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Psi. Vinicius Ravagnani</title>
+    <title>Painel Barbeiro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -524,7 +524,7 @@
     <div id="view-admin" class="view-section admin-panel">
         <div class="bg-slate-800 px-5 py-4 shadow-sm sticky top-0 z-30 flex justify-between items-center">
             <div>
-                <h2 class="font-bold text-lg text-slate-100">Painel<span class="text-amber-500">Psi</span> <span class="text-xs bg-teal-100 text-amber-400 px-2 py-0.5 rounded-full">Admin</span></h2>
+                <h2 class="font-bold text-lg text-slate-100">Painel<span class="text-amber-500">Barbeiro</span> <span class="text-xs bg-teal-100 text-amber-400 px-2 py-0.5 rounded-full">Admin</span></h2>
             </div>
             <button onclick="logoutAdmin()" class="text-xs font-semibold text-slate-500 bg-slate-900 px-3 py-1.5 rounded-full hover:bg-slate-200">
                 <i class="fa-solid fa-arrow-right-from-bracket mr-1"></i> Sair
@@ -1012,43 +1012,42 @@ Se estiver acessando pelo computador, após baixar o arquivo .ics, abra o Google
   </div>
     </div>
     <div id="modal-booking" class="modal-overlay hidden">
-        <div class="modal-content">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="font-bold text-lg text-white">Finalizar Agendamento</h3>
-                <button onclick="closeModal('modal-booking')" class="w-8 h-8 bg-gray-100 rounded-full text-gray-500 hover:bg-gray-200 transition">
-                    <i class="fa-solid fa-times"></i>
-                </button>
-            </div>
-            <form onsubmit="confirmBooking(event)" class="space-y-4">
-                <input type="text" id="book-name" placeholder="Seu Nome Completo" required class="input-field">
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <input type="tel" id="book-phone" placeholder="Seu WhatsApp (11) 99999-9999" required class="input-field" maxlength="15">
-                    <input type="email" id="book-email" placeholder="Seu E-mail (opcional)" class="input-field">
-                </div>
-                
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 mb-1">Como conheceu o profissional?</label>
-                    <select id="book-source" class="input-field">
-                        <option value="indication">Indicação</option>
-                        <option value="google">Google</option>
-                        <option value="instagram">Instagram</option>
-                        <option value="facebook">Facebook</option>
-                        <option value="other">Outro</option>
-                    </select>
-                </div>
-                
-                <div class="bg-blue-50 p-3 rounded-xl flex gap-3">
-                    <i class="fa-solid fa-circle-info text-sky-400 mt-0.5"></i>
-                    <p class="text-xs text-blue-800">Ao confirmar, você receberá os detalhes da sessão via WhatsApp e e-mail (se informado).</p>
-                </div>
-                
-                <button type="submit" class="w-full bg-gray-900 text-white font-bold py-4 rounded-xl hover:bg-black transition active:scale-[0.98] flex justify-center items-center gap-2">
-                    <i class="fa-solid fa-check"></i> Solicitar Agendamento
-                </button>
-            </form>
+    <div class="modal-content">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="font-bold text-lg text-white">Finalizar Agendamento</h3>
+            <button onclick="closeModal('modal-booking')" class="w-8 h-8 bg-gray-100 rounded-full text-gray-500 hover:bg-gray-200 transition">
+                <i class="fa-solid fa-times"></i>
+            </button>
         </div>
+        <form onsubmit="confirmBooking(event)" class="space-y-4">
+            
+            <div>
+                <label class="block text-xs font-bold text-slate-400 mb-1">Selecione o Serviço</label>
+                <select id="book-service" onchange="updateBookingTotal()" class="input-field text-white font-medium bg-slate-800 border-slate-600 focus:border-amber-500">
+                    </select>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-400 mb-1">Seu Nome</label>
+                <input type="text" id="book-name" placeholder="Ex: João Silva" required class="input-field">
+            </div>
+            
+            <div>
+                <label class="block text-xs font-bold text-slate-400 mb-1">Seu WhatsApp</label>
+                <input type="tel" id="book-phone" placeholder="(11) 99999-9999" required class="input-field" maxlength="15" onkeyup="mascaraFone(event)">
+            </div>
+
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700 flex justify-between items-center mt-4">
+                <span class="text-sm text-slate-400">Valor Total:</span>
+                <span id="booking-total-display" class="text-xl font-bold text-amber-500">R$ 0,00</span>
+            </div>
+            
+            <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-black font-black uppercase py-4 rounded-xl shadow-[0_0_15px_rgba(245,158,11,0.3)] transition active:scale-[0.98] flex justify-center items-center gap-2 mt-4">
+                <i class="fa-solid fa-check"></i> Confirmar Agendamento
+            </button>
+        </form>
     </div>
+</div>
 
     <div id="modal-day" class="modal-overlay hidden">
         <div class="modal-content h-[85vh] flex flex-col">
@@ -1716,125 +1715,119 @@ function updateSettingsUI() {
             document.getElementById('client-confirm-bar').classList.add('translate-y-0');
         }
         
-        // ATUALIZAR FUNÇÃO openBookingModal
+        /* --- NOVAS FUNÇÕES DE AGENDAMENTO BARBER PRO --- */
+
+// 1. Abre o modal e preenche a lista de cortes/serviços
 function openBookingModal() {
-    document.getElementById('modal-booking').classList.remove('hidden');
+    const modal = document.getElementById('modal-booking');
+    modal.classList.remove('hidden');
     
     // Limpar campos
     document.getElementById('book-name').value = '';
     document.getElementById('book-phone').value = '';
     
-    // POPULAR O SELECT DE SERVIÇOS
+    // Pegar o select
     const serviceSelect = document.getElementById('book-service');
-    serviceSelect.innerHTML = '';
+    serviceSelect.innerHTML = ''; // Limpa opções antigas
     
-    const services = state.settings.services || [];
+    // Pega serviços salvos ou usa padrão
+    const services = state.settings.services || [
+        { name: 'Corte Degradê', price: 50 },
+        { name: 'Barba', price: 35 }
+    ];
     
-    if (services.length === 0) {
-        // Fallback se não houver serviços configurados
+    // Cria as opções no select
+    services.forEach(srv => {
         const opt = document.createElement('option');
-        opt.value = 'padrao';
-        opt.dataset.price = state.settings.sessionValue || 50;
-        opt.text = `Corte Padrão - R$ ${state.settings.sessionValue || 50}`;
+        opt.value = srv.name;
+        opt.dataset.price = srv.price; // Guarda o preço escondido no elemento
+        opt.text = `${srv.name} - R$ ${srv.price},00`;
         serviceSelect.appendChild(opt);
-    } else {
-        services.forEach(srv => {
-            const opt = document.createElement('option');
-            opt.value = srv.name; // Salvamos o nome como ID simples ou use srv.id
-            opt.dataset.price = srv.price;
-            opt.text = `${srv.name} - R$ ${srv.price},00`;
-            serviceSelect.appendChild(opt);
-        });
-    }
+    });
     
-    // Atualizar preço inicial
+    // Atualiza o preço inicial
     updateBookingTotal();
 }
 
-// NOVA FUNÇÃO: Atualizar preço na tela
+// 2. Atualiza o preço na tela quando troca o serviço
 function updateBookingTotal() {
     const select = document.getElementById('book-service');
-    const price = select.options[select.selectedIndex].dataset.price;
-    document.getElementById('booking-total-display').innerText = `R$ ${price},00`;
+    if (select.selectedIndex >= 0) {
+        const price = select.options[select.selectedIndex].dataset.price;
+        document.getElementById('booking-total-display').innerText = `R$ ${price},00`;
+    }
 }
 
+// 3. Salva o agendamento no Firebase
 async function confirmBooking(e) {
     e.preventDefault();
     
-    // Pegar dados do formulário
     const nameInput = document.getElementById('book-name');
     const phoneInput = document.getElementById('book-phone');
+    const serviceSelect = document.getElementById('book-service');
     
-    if (!nameInput || !phoneInput) {
-        showToast("Erro no formulário. Recarregue a página.", "error");
+    // Validação
+    if (!nameInput.value || !phoneInput.value) {
+        showToast("Preencha nome e telefone.", "error");
         return;
     }
 
     const name = nameInput.value.trim();
-    let phone = phoneInput.value.trim();
+    const phone = phoneInput.value.trim();
     
-    // PEGAR SERVIÇO SELECIONADO
-    const select = document.getElementById('book-service');
-    // Se não tiver select (erro de carregamento), usa padrão
-    const serviceName = select ? select.value : 'Corte Padrão';
-    const serviceValue = select ? parseFloat(select.options[select.selectedIndex].dataset.price) : 0;
-
-    // Validação simples
-    if (!name || !phone) {
-        showToast("Preencha todos os campos.", "error");
-        return;
-    }
+    // Pega dados do serviço escolhido
+    const serviceName = serviceSelect.value;
+    const servicePrice = parseFloat(serviceSelect.options[serviceSelect.selectedIndex].dataset.price);
 
     showLoader(true);
 
     try {
-        // Formatar telefone (função auxiliar existente no seu código)
-        const formattedPhone = typeof formatPhone === 'function' ? formatPhone(phone) : phone;
-        
-        // Verifica se state.selectedDate existe, senão usa hoje
-        const dateToBook = state.selectedDate || new Date().toISOString().split('T')[0];
-        const slotToBook = state.selectedSlot || '00:00';
+        // Formata data e hora
+        const dateToBook = state.selectedDate; // Data que o usuário clicou no calendário (YYYY-MM-DD)
+        const slotToBook = state.selectedSlot; // Horário que ele clicou (HH:MM)
 
-        // Lógica de criar/atualizar cliente (Simplificada para foco no agendamento)
-        const clientRef = db.collection('clients').doc(formattedPhone);
-        await clientRef.set({
+        // 1. Salva/Atualiza Cliente
+        await db.collection('clients').doc(phone).set({
             name: name,
-            phone: formattedPhone,
+            phone: phone,
             lastSession: dateToBook,
             updatedAt: new Date()
         }, { merge: true });
 
-        // Criar agendamento
+        // 2. Cria o Agendamento
         const bookingId = db.collection('bookings').doc().id;
-        const bookingData = {
+        await db.collection('bookings').doc(bookingId).set({
             id: bookingId,
             date: dateToBook,
             time: slotToBook,
             clientName: name,
-            clientPhone: formattedPhone,
-            serviceName: serviceName, 
-            value: serviceValue,
+            clientPhone: phone,
+            serviceName: serviceName, // Salva "Corte Degradê"
+            value: servicePrice,      // Salva 50
             status: 'confirmed',
             createdAt: new Date(),
-            updatedAt: new Date(),
             reminderSent: false
-        };
-
-        await db.collection('bookings').doc(bookingId).set(bookingData);
+        });
         
-        // Fechar modal
-        if(typeof closeModal === 'function') closeModal('modal-booking');
+        // 3. Fecha modal e avisa
+        closeModal('modal-booking');
         
-        // REDIRECIONAR PRO WHATSAPP
+        // 4. Redireciona para WhatsApp
         setTimeout(() => {
             const dateFmt = dateToBook.split('-').reverse().join('/');
-            const message = `Fala mestre! Aqui é o ${name}. Agendei um *${serviceName}* para dia ${dateFmt} às ${slotToBook}. Tudo certo?`;
-            const encodedMessage = encodeURIComponent(message);
-            // Substitua SEUNUMERO pelo número real do barbeiro nas configurações ou fixo
-            window.location.href = `https://wa.me/5516999999999?text=${encodedMessage}`;
+            // Mensagem estilo "Brother"
+            const msg = `Fala mestre! Aqui é o *${name}*. Agendei um *${serviceName}* para dia ${dateFmt} às ${slotToBook}. Confirma pra mim?`;
+            
+            // Troque pelo número do barbeiro se quiser fixo, ou mantenha dinâmico se tiver config
+            const barberPhone = "5516999999999"; // COLOQUE SEU NÚMERO AQUI PARA TESTE
+            
+            window.location.href = `https://wa.me/${barberPhone}?text=${encodeURIComponent(msg)}`;
         }, 1000);
 
         showToast("Agendamento realizado!");
+        
+        // Atualiza a tela de horários
+        renderClientSlots();
 
     } catch (error) {
         console.error(error);
@@ -1842,6 +1835,15 @@ async function confirmBooking(e) {
     } finally {
         showLoader(false);
     }
+}
+
+// Função extra para mascara de telefone (opcional, mas ajuda)
+function mascaraFone(event) {
+    let v = event.target.value;
+    v = v.replace(/\D/g,"");
+    v = v.replace(/^(\d\d)(\d)/g,"($1) $2");
+    v = v.replace(/(\d{5})(\d)/,"$1-$2");
+    event.target.value = v;
 }
         
         function validatePhone(phone) {
