@@ -538,7 +538,7 @@
                 <i class="fa-regular fa-calendar-days mr-1"></i> Agenda
             </button>
             <button onclick="switchTab('clients')" class="nav-tab" data-tab="clients">
-                <i class="fa-solid fa-users mr-1"></i> Pacientes
+                <i class="fa-solid fa-users mr-1"></i> Clientes
             </button>
             <button onclick="switchTab('financial')" class="nav-tab" data-tab="financial">
                 <i class="fa-solid fa-chart-line mr-1"></i> Financeiro
@@ -589,7 +589,7 @@
                             <div class="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center mb-3">
                                 <i class="fa-solid fa-calendar-check text-xl"></i>
                             </div>
-                            <div class="text-slate-400 text-[10px] font-bold uppercase">Cortes-Serviços (Mês)</div>
+                            <div class="text-slate-400 text-[10px] font-bold uppercase">Cortes/Serviços (Mês)</div>
                             <div class="stats-number text-slate-100" id="dash-month-count">0</div>
                         </div>
                         <div class="bg-slate-800 p-5 rounded-xl shadow-sm border border-slate-700 dashboard-card">
@@ -1278,8 +1278,8 @@ console.log("Firebase initialized successfully");
                 name: "Vinicius Ravagnani",
                 registration: "CRP 06/12345",
                 services: [ "Corte Social", "Degradê", "Barba", "Pezinho" ],
-                sessionValue: 150,
-                sessionDuration: 50
+                sessionValue: a partir de 35,
+                sessionDuration: 30
             },
             view: "view-profile"
         };
@@ -4000,7 +4000,7 @@ async function generateSlotsForSingleDay(period, date) {
                     professionalName: "Vinicius Ravagnani",
                     crp: "CRP 06/12345",
                     specialties: "Terapia Cognitivo-Comportamental, Ansiedade, Autoconhecimento",
-                    sessionValue: 150,
+                    sessionValue: 35,
                     sessionDuration: 50,
                     workingDays: ["mon", "tue", "wed", "thu", "fri"],
                     createdAt: new Date(),
